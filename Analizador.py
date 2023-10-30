@@ -3,7 +3,15 @@
 class Analizador:
     def __init__(self):
         self.tabla_simbolos = {}
- 
+
+    def leer_archivo_texto(nombre_archivo):
+        try:
+            with open(nombre_archivo, 'r') as archivo:
+                text = archivo.read()
+            return text
+        except FileNotFoundError:
+            print(f"El archivo '{nombre_archivo}' no se encontró.")
+            return None
     #Verificamos si la variable es tipo int, float, void, string#
     def validar_variable:
         
