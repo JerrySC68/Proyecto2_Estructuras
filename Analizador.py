@@ -13,11 +13,11 @@ class Analizador:
             print(f"El archivo '{nombre_archivo}' no se encontró.")
             return None
     #Verificamos si la variable es tipo int, float, void, string#
-    def validar_variable:
+    #def validar_variable:
         
 
     #Agrega la variable a la tabla de simbolos, antes se tiene que validar la variable#
-    def agregar_variable:
+    #def agregar_variable:
         
     
     #Verificamos si la funcion es tipo int, float, void, string#
@@ -25,7 +25,7 @@ class Analizador:
     
 
     #Agrega la funcion a la tabla de simbolos, antes se tiene que validar la variable#
-    def agregar_funcion:
+    #def agregar_funcion:
     
 
     #def validar_contenido_funcion posible método a desarrollar#
