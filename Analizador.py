@@ -7,7 +7,7 @@ class Analizador:
 
 
 
-    def leer_archivo_texto(codigo_fuente):
+    def leer_archivo_texto(self, codigo_fuente):
         try:
             with open(codigo_fuente, 'r') as archivo:
                 text = archivo.read()
@@ -21,8 +21,6 @@ class Analizador:
         if self.leer_archivo_texto(codigo_fuente) is not None:
             tokens = re.findall(r'\b\w+\b', codigo_fuente)
             return tokens
-        else:
-            print("No hay código para analizar") 
         
     #Verificamos si la variable es tipo int, float, void, string#
     #def validar_variable:
@@ -38,7 +36,7 @@ class Analizador:
         tipo_actual = None     # Tipo de dato de la función (int, void, float o string)#
         nombre_actual = None   # Nombre de la función#
         dentro_funcion = False # Nos indica si estamos dentro de los parámetros de la función (dentro de las {})#
-        
+
         for i, token in enumerate(tokens):
             if token in ['int','float','string','void']: # Si nos encontramos algunas de estos 4 palabras se refieren al tipo de función y lo guardamos en tipo_actual#
                 tipo_actual = token
