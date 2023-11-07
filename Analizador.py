@@ -17,12 +17,16 @@ class Analizador:
             return None
         
 
-    def tokenize(self, codigo_fuente):
-        if self.leer_archivo_texto(codigo_fuente) is not None:
-            tokens = re.findall(r'\b\w+\b', codigo_fuente)
-            return tokens
-        return None
-        
+    #def tokenize(self, codigo_fuente):
+    #    if self.leer_archivo_texto(codigo_fuente) is not None:
+    #        tokens = re.findall(r'\b\w+\b', codigo_fuente)
+    #        return tokens
+    #    return None
+
+    def tokenize(self, source_code):
+        tokens = re.findall(r'\b\w+\b', source_code)
+        return tokens
+
     #Verificamos si la variable es tipo int, float, void, string#
     #def validar_variable:
         
@@ -45,11 +49,14 @@ class Analizador:
                 elif token == '{': #Agregar contador para verificar cantidad de llaves abiertas para ver las llaves cerradas.
                     if nombre_actual and tipo_actual:
                         self.tabla_simbolos[nombre_actual] = tipo_actual
+                        self.tipo_funcion = tipo_actual
                     tipo_actual = None
                     nombre_actual = None
                     dentro_funcion = True
                 elif token == '}':
                     dentro_funcion = False
+                elif tipo_actual and not dentro_funcion:
+                    nombre_actual = token
                 elif self.tipo_funcion and token == 'return':
                     return_tipo = tokens[i + 1]
                     if return_tipo != self.tipo_funcion:
