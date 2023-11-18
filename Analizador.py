@@ -50,6 +50,9 @@ class Analizador:
 
 
 
+    #Modificar de aquí hasta abajo...
+
+
     def leer_archivo_texto(self, codigo_fuente):
         try:
             with open(codigo_fuente, 'r') as archivo:
