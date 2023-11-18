@@ -1,9 +1,52 @@
 import re
+import queue
+import array
+import hashlib
+import palabrasReservadas
+from io import open
 
 class Analizador:
     def __init__(self):
-        self.tabla_simbolos = {}
-        self.tipo_funcion = None
+         #Declaracion de diccionarios
+        self.hashFunc={}
+        self.hashVar={}
+
+        self.error=[] #Arreglo de los errores
+        self.codigo=""
+        self.mensjeError=""
+        self.iterad=0 #Iterador
+
+        #queues que funcionan como un stack
+        self.fun=queue.LifoQueue()
+        self.toString = queue.LifoQueue()
+        self.variables=queue.LifoQueue()
+        
+        self.primeraL=1
+        self.codigoFuente=[]
+        self.check=[]
+
+        
+    def appendDiccionarioFun(self, obj):
+        key = self.hashing(obj.nombre)
+        key +=self.iterad
+        self.hashFunc[key]=obj
+        self.iterad =0 
+        
+    def appendDiccionarioVar(self, obj):
+        key = self.hashing(obj.nombre)
+        key +=self.iterad
+        self.hashVar[key]=obj
+        self.iterad =0 
+        
+    def cantLlaves(self, dato):
+        stack=queue.LifoQueue()
+        for iterad in range(len(dato)):
+            if dato[iterad] == "{":
+                stack.put("{")
+            elif dato[iterad] == "}":
+                if not stack.empty():  #Se asegura de que el stack no este vacio, esto significaría
+                    stack.get()        #que no hay una llave que abra dentro del stack
+        return stack.empty()
 
 
 
@@ -26,13 +69,6 @@ class Analizador:
     def tokenize(self, source_code):
         tokens = re.findall(r'\b\w+\b', source_code)
         return tokens
-
-    #Verificamos si la variable es tipo int, float, void, string#
-    #def validar_variable:
-        
-
-    #Agrega la variable a la tabla de simbolos, antes se tiene que validar la variable#
-    #def agregar_variable:
         
     
     #Verificamos si la funcion es tipo int, float, void, string#
@@ -64,19 +100,6 @@ class Analizador:
 
 
 
-    #Agrega la funcion a la tabla de simbolos, antes se tiene que validar la variable#
-    #def agregar_funcion:
-    
 
-    #def validar_contenido_funcion posible método a desarrollar#
-
-
-
-analizador1 = Analizador()
-analizador1.validar_funcion("codigo_fuente.txt")
-
-print("Tabla de Símbolos:")
-for name, data_type in analizador1.tabla_simbolos.items():
-    print(f"Nombre: {name}, Tipo: {data_type}")
 
  
