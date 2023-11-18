@@ -17,6 +17,7 @@ class Analizador:
         self.iterad=0 #Iterador
 
         #queues que funcionan como un stack
+        #LifoQueue nos permite crear stack para python.
         self.fun=queue.LifoQueue()
         self.toString = queue.LifoQueue()
         self.variables=queue.LifoQueue()
