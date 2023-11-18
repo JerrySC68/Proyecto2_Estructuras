@@ -47,4 +47,54 @@ class Analizador:
                 if not stack.empty():  #Se asegura de que el stack no este vacio, esto significaría
                     stack.get()        #que no hay una llave que abra dentro del stack
         return stack.empty()   
+    def verificaParam(self, valor, aux):
+        declaraciones=[]
+        read=""
+        for iterad in range(len(valor)):
+            if valor[iterad] != " " and valor[iterad] != "," and valor[iterad] != ")":
+                read += valor[iterad]
+            elif valor[iterad] == '' and valor[iterad-1] == ",":
+                a=0
+            elif valor[iterad] == "," or valor[iterad] == ")": #Setteamos segun los valores para insertar en diccionario
+                palabra=palabrasReservadas.PR()
+                palabra.setIde("parametro")
+                palabra.setNombre(read)
+                palabra.setTipo(declaraciones[0])
+                palabra.setOrigen(aux)
+                self.variables.put(palabra)
+                self.check.append(palabra)
+                declaraciones.pop()
+                read=""
+                self.appendDiccionarioVar(palabra)
+            else:
+                if read != '':
+                    declaraciones.append(read)
+                read=""
+            
+    def verificaExistencia_d(self, nombre):
+        a=self.hashing(nombre)
+        a+= self.iterad
+        temp=self.hashVar.get(a)
+        if temp is not None and nombre != temp.getNombre():
+            self.iterad += 1
+            self.verificaExistencia_d(nombre)
+            return False
+        if temp is not None and nombre == temp.getNombre():
+            return True
+        return False
     
+    def verificaExistencia(self, nombre):
+        return self.verificaExistencia_d(nombre)
+    
+    def imprimirFuncion(self):
+        print(self.codigo)
+    
+    def muestraErrores_d(self):
+        if len(self.error)==0:
+            print("Compilación exitosa")
+        else:
+            for iterad in self.error:
+                print("Error:" + iterad)
+                
+    def muestraErrores(self):
+        return self.muestraErrores_d()
