@@ -32,12 +32,14 @@ class Analizador:
         self.hashFunc[key]=obj
         self.iterad =0 
         
+
     def appendDiccionarioVar(self, obj):
         key = self.hashing(obj.nombre)
         key +=self.iterad
         self.hashVar[key]=obj
         self.iterad =0 
         
+
     def cantLlaves(self, dato):
         stack=queue.LifoQueue()
         for iterad in range(len(dato)):
@@ -47,6 +49,8 @@ class Analizador:
                 if not stack.empty():  #Se asegura de que el stack no este vacio, esto significaría
                     stack.get()        #que no hay una llave que abra dentro del stack
         return stack.empty()   
+    
+
     def verificaParam(self, valor, aux):
         declaraciones=[]
         read=""
@@ -71,6 +75,7 @@ class Analizador:
                     declaraciones.append(read)
                 read=""
             
+
     def verificaExistencia_d(self, nombre):
         a=self.hashing(nombre)
         a+= self.iterad
@@ -83,18 +88,22 @@ class Analizador:
             return True
         return False
     
+
     def verificaExistencia(self, nombre):
         return self.verificaExistencia_d(nombre)
     
+
     def imprimirFuncion(self):
         print(self.codigo)
     
+
     def muestraErrores_d(self):
         if len(self.error)==0:
             print("Compilación exitosa")
         else:
             for iterad in self.error:
                 print("Error:" + iterad)
+                
                 
     def muestraErrores(self):
         return self.muestraErrores_d()
