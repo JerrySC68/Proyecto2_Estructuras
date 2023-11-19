@@ -98,3 +98,41 @@ class Analizador:
                 
     def muestraErrores(self):
         return self.muestraErrores_d()
+    
+    def checkParam(self, dato):
+        read=""
+        txt=""
+        aux=""
+        for iterad in range(len(dato)):
+            if dato[iterad] == "(":
+                break
+            if dato[iterad] != " " and dato[iterad] != "(" and dato[iterad] != ")":
+                read += dato[iterad] 
+                txt=read
+        read=""
+        for iterad in range(len(dato)):
+            if dato[iterad] != " " and dato[iterad] != "(" and dato[iterad] != ")" and dato[iterad] != ",":
+                read += dato[iterad]
+                aux=read
+            elif dato[iterad] == "(":
+                val=self.hashing(read)
+                val2=self.hashFunc.get(val)
+                if val2 is None:
+                    self.mensjeError = "Error en la linea: " +str(self.primeraL)+ " la funcion " + read + " no esta declarada."
+                    self.error.append(self.mensjeError)
+                    return 
+                read=""
+                    
+            elif dato[iterad] == "," or dato[iterad] == ")":
+                for a in self.check:
+                    if a.getOrigen() == txt:
+                        if txt.isnumeric() and txt.find(".") != -1 and a.getTipo() != "float":
+                            self.mensjeError = "Error en la linea: " + str(self.primeraL) + "Los parametros no coinciden con la funcion declarada"
+                            self.error.append(self.mensjeError)
+                        elif txt.isnumeric() and txt.find(".") == 1 and a.getTipo() != "int":
+                            self.mensjeError = "Error en la linea: "+str(self.primeraL)+"Los parametros no coinciden con la funcion declarada"
+                            self.error.append(self.mensjeError)
+                if dato[iterad] == ")":
+                    return 
+                else:
+                    read=""
