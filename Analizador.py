@@ -25,28 +25,29 @@ class Analizador:
         self.codigoFuente=[]
         self.check=[]
 
-
-    def hashing(self, ide):
+    #Toma un ID y retorna un valor hash
+    def hashing(self, ID):
         aux=0
-        for iterad in ide:
-            aux += ord(iterad)   #retorna el unicode de el caracter enviado
+        for iterad in ID:        #ord sirve para obtener el valor ASCII de un carácter.
+            aux += ord(iterad)   #retorna el unicode de el caracter enviado.
         return aux % 20
         
-        
-    def appendDiccionarioFun(self, obj):
-        key = self.hashing(obj.nombre)
+    #Añade objeto al diccionario de Funciones y usa la función hashing para obtener la clave
+    def appendDiccionarioFun(self, objeto):
+        key = self.hashing(objeto.nombre)
         key +=self.iterad
-        self.hashFunc[key]=obj
+        self.hashFunc[key]=objeto
         self.iterad =0 
         
-
-    def appendDiccionarioVar(self, obj):
-        key = self.hashing(obj.nombre)
+      #Añade objeto al diccionario de Variables y usa la función hashing para obtener la clave
+    def appendDiccionarioVar(self, objeto):
+        key = self.hashing(objeto.nombre)
         key +=self.iterad
-        self.hashVar[key]=obj
+        self.hashVar[key]=objeto
         self.iterad =0 
         
-
+    #Para verificar la cantidad de llaves dentro del código a analizar
+    #Osea verifica si las llaves están balanceadas.
     def cantLlaves(self, dato):
         stack=queue.LifoQueue()
         for iterad in range(len(dato)):
@@ -58,6 +59,7 @@ class Analizador:
         return stack.empty()   
     
 
+    #Para verificar el contenido dentro de los parentesís de la función (Parametro) y agregarlos al diccionario de variables.
     def verificaParam(self, valor, aux):
         declaraciones=[]
         read=""
@@ -66,9 +68,9 @@ class Analizador:
                 read += valor[iterad]
             elif valor[iterad] == '' and valor[iterad-1] == ",":
                 a=0
-            elif valor[iterad] == "," or valor[iterad] == ")": #Setteamos segun los valores para insertar en diccionario
+            elif valor[iterad] == "," or valor[iterad] == ")": #Setteamos segun los valores para insertar en diccionario de variables
                 palabra=palabrasReservadas.PR()
-                palabra.setIde("parametro")
+                palabra.setID("parametro")
                 palabra.setNombre(read)
                 palabra.setTipo(declaraciones[0])
                 palabra.setOrigen(aux)
@@ -82,7 +84,7 @@ class Analizador:
                     declaraciones.append(read)
                 read=""
             
-
+    #Para verificar la existencia de una variable revisando su respectivo nombre en el diccionario.
     def verificaExistencia_d(self, nombre):
         a=self.hashing(nombre)
         a+= self.iterad
@@ -104,6 +106,7 @@ class Analizador:
         print(self.codigo)
     
 
+    #Nos servirá para mostrar errores del código o indicar si no hay. 
     def muestraErrores_d(self):
         if len(self.error)==0:
             print("Compilación exitosa")
@@ -116,6 +119,7 @@ class Analizador:
         return self.muestraErrores_d()
     
 
+    #Para verificar la validez de los parámetros, ver si han sido declaradas en los diccionarios o no.
     def checkParam(self, dato):
         read=""
         txt=""
@@ -158,9 +162,10 @@ class Analizador:
     def leeArchivo(self, file):
         self.leeArchivo_d(file)
       
-      
+    
+    #Va leer el archivo.txt con el código fuente, lo almacena en atributo "codigoFuente".
     def leeArchivo_d(self, file):
-        archivo=open(file, "r", encoding="utf-8")
+        archivo=open(file, "r", encoding="utf-8") #No solo hay que poner el archivo, también se pone el tipo de codificación.
         valor= archivo.readlines()
         archivo.seek(0)
         self.codigo=archivo.read()
@@ -175,7 +180,7 @@ class Analizador:
             self.__leer_String(nuevo,flag)
             self.primeraL += 1
 
-    
+    #
     def __leer_String(self, linea,flag):
         #Aquí se analizará el código, se usará el hashing y verificaremos los errores, si lo hay...
         stack = queue.LifoQueue()
