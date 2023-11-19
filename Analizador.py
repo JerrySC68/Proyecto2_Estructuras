@@ -108,6 +108,7 @@ class Analizador:
     def muestraErrores(self):
         return self.muestraErrores_d()
     
+
     def checkParam(self, dato):
         read=""
         txt=""
@@ -145,3 +146,29 @@ class Analizador:
                     return 
                 else:
                     read=""
+
+
+    def leeArchivo(self, file):
+        self.leeArchivo_d(file)
+      
+      
+    def leeArchivo_d(self, file):
+        archivo=open(file, "r", encoding="utf-8")
+        valor= archivo.readlines()
+        archivo.seek(0)
+        self.codigo=archivo.read()
+        alfa=" "
+        alfa=self.codigo.strip()
+        flag=self.cantLlaves(alfa)
+        archivo.close()
+        for iterad in valor:
+            n=iterad
+            nuevo=n.strip()           
+            self.codigoFuente.append(nuevo)
+            self.__leer_String(nuevo,flag)
+            self.primeraL += 1
+
+    
+    def __leer_String(self, linea,flag):
+        #Aquí se analizará el código, se usará el hashing y verificaremos los errores, si lo hay...
+        stack = queue.LifoQueue()
