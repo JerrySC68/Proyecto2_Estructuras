@@ -25,6 +25,13 @@ class Analizador:
         self.codigoFuente=[]
         self.check=[]
 
+
+    def hashing(self, ide):
+        aux=0
+        for iterad in ide:
+            aux += ord(iterad)   #retorna el unicode de el caracter enviado
+        return aux % 20
+        
         
     def appendDiccionarioFun(self, obj):
         key = self.hashing(obj.nombre)
