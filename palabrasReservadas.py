@@ -1,24 +1,33 @@
-
-"""
-Clase: 
-    - palabrasReservadas
-
-Atributos: 
-    - nombre
-    - tipo
-    - dato
-    - ID
-    - origen
-
-Métodos: 
-    - Gets()
-    - Sets()
-    - __init__() ->Constructor
-    - toString()
-"""
-
 class palabrasReservadas:
+    """
+     Clase: palabrasReservadas
+        Esta clase nos ayudará almacenar los distintos datos
+        de funciones y variables del código fuente dentro
+        de sus respectivos diccionarios.
+
+    Atributos
+    -----------
+
+    - nombre (string): Nombre de la variable o función. 
+    - tipo   (string): Tipo de la variable o función. 
+    - dato   (string): Dato de la variable o función. 
+    - ID     (string): Identificador de la variable o función. 
+    - origen (string): Origen de la variable o función. 
+
+    Métodos
+    ----------
+
+    - Gets(): Obtiene el atributo.
+    - Sets(): Settea el atributo.
+    - __init__(): Es el constructor de la clase.
+    - toString(): Imprime los atributos de la clase.
+    """
+
+    
     def __init__(self):
+        """
+        Constructor de la clase
+        """
         self.nombre=""
         self.tipo=""
         self.dato=""
@@ -57,6 +66,9 @@ class palabrasReservadas:
     
     
     def toString(self):
+        """
+        Imprime los datos de la clase
+        """
         print("Nombre" + self.nombre + '\n')
         print("Tipo" + self.tipo + '\n')
         print("Identificador" + self.ID + '\n')
