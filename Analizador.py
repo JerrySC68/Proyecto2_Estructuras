@@ -61,6 +61,8 @@ class Analizador:
         self.codigo=""
         self.mensjeError=""
         self.iterad=0 
+        self.canllavesAbiertas = 0
+        self.canllavesCerradas = 0
         self.fun=queue.LifoQueue()
         self.toString = queue.LifoQueue()
         self.variables=queue.LifoQueue()
@@ -127,7 +129,7 @@ class Analizador:
             elif valor[iterad] == '' and valor[iterad-1] == ",":
                 a=0
             elif valor[iterad] == "," or valor[iterad] == ")": #Setteamos segun los valores para insertar en diccionario de variables
-                palabra=palabrasReservadas.PR()
+                palabra=palabrasReservadas.palabrasReservadas()
                 palabra.setID("parametro")
                 palabra.setNombre(read)
                 palabra.setTipo(declaraciones[0])
@@ -261,3 +263,304 @@ class Analizador:
         indicar en que línea ocurre y cuál es el error. Usa los diccionarios y algunos
         de los métodos de esta clase para realizar el mejor análisis posible.
         """
+        stack = queue.LifoQueue()
+        declaracion = ""
+        declaraciones = []
+        auxiliar = ""
+        n = len(linea)
+        i = 0
+        if "{" in linea:
+            self.canllavesAbiertas = self.canllavesAbiertas + 1
+        elif "}" in linea:
+            self.canllavesCerradas = self.canllavesCerradas + 1
+        while i < n:
+            if linea[i] != " " and linea[i] != "(" and linea[i] != "=" and linea[i] != "}":
+                declaracion += linea[i]
+            elif linea[i] == "}":
+                if self.fun.empty():
+                    return
+                else:
+                    self.fun.get()
+            elif linea[i] == '(' and declaracion != "if" and declaracion != "while":
+                declaracion = ""
+                stack.put("(")
+                i += 1
+                while not stack.empty():
+                    if linea[i] == ")":
+                        stack.get()
+                    declaracion += linea[i]
+                    i += 1
+                i -= 1
+                if declaracion != ")":
+                    hash = self.hashing(auxiliar)
+                    aux = self.hashVar.get(hash)
+                    if not (aux):
+                        self.verificaParam(declaracion, auxiliar)
+                    else:
+                        self.checkParam(linea)
+                declaracion = ""
+            elif linea[i] == "=" and len(declaraciones) == 2:
+                reservada = palabrasReservadas.palabrasReservadas()
+                if self.fun.empty():
+                    reservada.setID("variable")
+                    if declaracion is not ["float","string","int","void"]:
+                        return 
+                    else:
+                        reservada.setNombre(declaraciones[1])
+                        reservada.setTipo(declaraciones[0])
+                        reservada.setOrigen("main")
+                        declaracion = ""
+                        i += 2
+                        reservada.setDato(declaracion)
+                else:
+                    reservada.setID("variable")
+                    if declaracion is not ["float","string","int","void"]:
+                        return 
+                    reservada.setNombre(declaraciones[1])
+                    reservada.setTipo(declaraciones[0])
+                    reservada.setOrigen(self.fun.queue[-1].getNombre())
+                    declaracion = ""
+                    stack.put("(")
+                    i += 2
+                    while not stack.empty():
+                        declaracion += linea[i]
+                        i += 1
+                        stack.get()
+
+                    i -= 1
+                    if self.verificaExistencia(declaracion):
+                        var = self.hashVar.get(self.hashing(declaracion))
+                        if var.getTipo() == reservada.getTipo():
+                            reservada.setDato(declaracion)
+                        else:
+                            self.errorstring = "Existe un error en la línea " + str(
+                                self.primeraL) + " El tipo de dato de la variable " + "'" + reservada.getNombre() + "'" + " no coincide con el tipo de dato del parametro "+ declaracion
+                            self.error.append(self.errorstring)
+
+                if self.verificaExistencia(reservada.getNombre()):
+                    auxiliar = "Existe un error en la linea " + str(
+                        self.primeraL) + reservada.getNombre() + " ha sido declarada previamente"
+                    self.error.append(auxiliar)
+                else:
+                    self.variables.put(reservada)
+                    self.appendDiccionarioVar(reservada)
+            elif linea[i] == "=" and len(declaracion) != 2:
+                guardastring = declaraciones.pop(0)
+                declaracion = ""
+                i += 1
+                if not self.verificaExistencia(guardastring):
+                    error = "Existe un error en la línea " + str(
+                        self.primeraL) + ": " + guardastring + " no se encuentra declarado"
+                    self.error.append(error)
+                else:
+                    self.hashVar.get(self.hashing(guardastring)).setDato(declaracion)
+            elif declaracion == "void":
+                reservada = palabrasReservadas.palabrasReservadas()
+                reservada.setID("funcion")
+                declaracion = ""
+                stack.put("(")
+                i += 1
+                while not stack.empty():
+                    if linea[i] == "(":
+                        stack.get()
+                    else:
+                        declaracion += linea[i]
+                        i += 1
+                i -= 1
+                reservada.setNombre(declaracion)
+                auxiliar = declaracion
+                reservada.setOrigen("main")
+                reservada.setTipo("void")
+                self.fun.put(reservada)
+                self.toString.put(reservada)
+                declaracion = ""
+                self.appendDiccionarioFun(reservada)
+
+            elif declaracion == "while":
+                reservada = palabrasReservadas.palabrasReservadas()
+                reservada.setID("condicion")
+                declaracion = ""
+                aux = linea
+                i += 1
+                stack.put("(")
+                while not stack.empty():
+                    if linea[i] == ")":
+                        stack.get()
+                    else:
+                        declaracion += linea[i]
+                        i += 1
+                i -= 1
+                if "{" in aux:
+                    reservada.setNombre("while")
+                    reservada.setOrigen(self.fun.get().getNombre())
+                    reservada.setTipo("while")
+                    self.fun.put(reservada)
+                    self.toString.put(reservada)
+                    declaracion = ""
+                    self.appendDiccionarioFun(reservada)
+                else:
+                    self.errorstring = "Existe un error en la línea " + str( self.primeraL) + " while no tiene valor de {"
+                    self.error.append(self.errorstring)
+            elif declaracion == "if":
+                reservada = palabrasReservadas.palabrasReservadas()
+                reservada.setID("condicion")
+                declaracion = ""
+                aux = linea
+                i += 1
+                stack.put("(")
+                while not stack.empty():
+                    if linea[i] == ")":
+                        stack.get()
+                    else:
+                        declaracion += linea[i]
+                        i += 1
+                i -= 1
+                if "{" in aux:
+                    reservada.setNombre("if")
+                    reservada.setOrigen(self.fun.get().getNombre())
+                    reservada.setTipo("if")
+                    reservada.setDato(declaracion)
+                    self.fun.put(reservada)
+                    self.toString.put(reservada)
+                    declaracion = ""
+                    self.appendDiccionarioFun(reservada)
+                else:
+                     self.errorstring = "Existe un error en la línea " + str( self.primeraL) + " if no tiene valor de {"
+                     self.error.append(self.errorstring)
+            elif declaracion == "return":
+                if not self.fun.empty():
+                    declaracion = ""
+                    i += 1
+                    stack.put("(")
+                    while not stack.empty():
+                        declaracion += linea[i]
+                        i += 1
+                        stack.get()
+                    if self.verificaExistencia(declaracion):
+                        reservada = self.hashVar.get(self.hashing(declaracion))
+                        reservadaP = self.hashFunc.get(self.hashing(reservada.getOrigen()))
+                        if reservadaP.getTipo() == "void":
+                            self.errorstring = "Existe un error en la línea " + str(
+                                self.primeraL) + " void no tiene valor de retorno"
+                            self.error.append(self.errorstring)
+                        elif reservadaP.getTipo() != reservada.getTipo() and reservada.getTipo() != self.fun.queue[
+                            -1].getTipo():
+                            self.errorstring = "Existe un error en la línea " + str(
+                                self.primeraL) + " valor de retorno no coincide con la declaración de " + reservadaP.getNombre()
+                            self.error.append(self.errorstring)
+                        elif reservada.getTipo() != reservadaP.getTipo():
+                            self.errorstring = "Existe un error en la línea " + str(
+                                self.primeraL) + " valor de retorno no coincide con la declaración de " + \
+                                               self.fun.queue[-1].getNombre()
+                            self.error.append(self.errorstring)
+                else:
+                    if not flag:
+                        self.errorstring = "Existe un error en la línea " + str(
+                            self.primeraL) + ": 'return' fuera de la función correspondiente"
+                        self.error.append(self.errorstring)
+            elif declaracion == "int":
+                flag = True
+                declaracion = ""
+                stack.put("(")
+                j = i
+                j += 1
+                while not stack.empty():
+                    if linea[j] != '=' and linea[j] != ' ' and linea[j] != '(':
+                        declaracion += linea[j]
+                    if linea[j] == '=':
+                        stack.get()
+                        flag = False
+                    if linea[j] == '(':
+                        stack.get()
+                        flag = True
+                    j += 1
+                if flag:
+                    palabra = palabrasReservadas.palabrasReservadas()
+                    palabra.setID("funcion")
+                    palabra.setNombre(declaracion)
+                    auxiliar = ""
+                    auxiliar = declaracion
+                    palabra.setOrigen("main")
+                    palabra.setTipo("int")
+                    self.fun.put(palabra)
+                    self.toString.put(palabra)
+                    declaracion = ""
+                    self.appendDiccionarioFun(palabra)
+                else:
+                    declaraciones.append("int")
+                    declaracion = ""
+            elif declaracion == "float":
+                flag = True
+                declaracion = ""
+                stack.put("(")
+                j = i
+                j += 1
+                while not stack.empty():
+                    if linea[j] != '=' and linea[j] != ' ' and linea[j] != '(':
+                        declaracion += linea[j]
+                    if linea[j] == '=':
+                        stack.get()
+                        flag = False
+                    if linea[j] == '(':
+                        stack.get()
+                        flag = True
+                    j += 1
+                if flag:
+                    palabra = palabrasReservadas.palabrasReservadas()
+                    palabra.setID("funcion")
+                    palabra.setNombre(declaracion)
+                    auxiliar = ""
+                    auxiliar = declaracion
+                    palabra.setOrigen("main")
+                    palabra.setTipo("float")
+                    self.fun.put(palabra)
+                    self.toString.put(palabra)
+                    declaracion = ""
+                    self.appendDiccionarioFun(palabra)
+                else:
+                    declaraciones.append("float")
+                    declaracion = ""
+            elif declaracion == "string":
+                flag = True
+                declaracion = ""
+                stack.put("(")
+                j = i
+                j += 1
+                while not stack.empty():
+                    if linea[j] != '=' and linea[j] != ' ' and linea[j] != '(':
+                        declaracion += linea[j]
+                    if linea[j] == '=':
+                        stack.get()
+                        flag = False
+                    if linea[j] == '(':
+                        stack.get()
+                        flag = True
+                    j += 1
+                if flag:
+                    palabra = palabrasReservadas.palabrasReservadas()
+                    palabra.setID("funcion")
+                    palabra.setNombre(declaracion)
+                    auxiliar = ""
+                    auxiliar = declaracion
+                    palabra.setOrigen("main")
+                    palabra.setTipo("string")
+                    self.fun.put(palabra)
+                    self.toString.put(palabra)
+                    declaracion = ""
+                    self.appendDiccionarioFun(palabra)
+                else:
+                    declaraciones.append("string")
+                    declaracion = ""  
+            else:
+                declaraciones.append(declaracion)
+                declaracion = ""
+            i += 1
+            if i-n == 1:
+                if self.canllavesCerradas > self.canllavesAbiertas:
+                    self.errorstring = "Existe un error: " + " faltan llaves por abrir "
+                    self.error.append(self.errorstring)
+                elif  self.canllavesCerradas < self.canllavesAbiertas:
+                    self.errorstring = "Existe un error: " + " faltan llaves por cerrar "
+                    self.error.append(self.errorstring)
+
+       
